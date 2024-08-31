@@ -2,159 +2,76 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Send Location to ESP32</title>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet"> <!-- New font -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AURUM</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap" rel="stylesheet">
     <style>
         body {
-            font-family: 'Roboto', sans-serif; /* Apply new font */
-            background-image: url('https://cdn1.picuki.com/hosted-by-instagram/q/0exhNuNYnjBGZDHIdN5WmL9I2Pk2GAlRNecaS7j0nyZiNxIsbHWB58ltwdGn%7C%7CDh7IAhgASuRYztk5o0sV1VUDT17PUPYSLOOSTtU56iQV+ylvDxm95Rilr09JXcYY3Go9covVWapNWwSDv5PHL%7C%7Clo79UvOa0LGFq8zCXW%7C%7CdDmG4CqZL0APIz9Z8j3aqT3ULr+JAwIy9L%7C%7CyUnKF4n9pCL5DwEXbr2MM1wq+95Q6NKtckG1Ozvj3jpQTxsRGB9KD+XudblyuIPjhvkeCYb%7C%7CFDwTIctKGtPmHGelVA0toFzqbWdAtw9%7C%7CNwZkIH2CmUEXTE86kEon5zgx3PySVmLh3pi8jP5k4qlP9AflaDPKvbPBu3exhvJf5vMH7JnZ1tfA8jdSlfSCu29AI5Wk9YZStwbhQeTp0CCerPLzxp1WWcT2m2JVA==.jpeg'); /* Kendall Jenner's photo as background */
-            background-size: cover;
-            background-position: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
+            font-family: 'Roboto Mono', monospace;
             margin: 0;
-            color: #fff;
-            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Text shadow for better readability */
-            overflow: hidden;
-            position: relative;
+            display: flex;
+            justify-content: space-between;
         }
-
         .container {
-            text-align: center;
-            background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent background */
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.5);
-            max-width: 350px;
-            width: 90%;
+            width: 70%;
+            padding: 40px;
+            text-align: left; /* Align text to the left */
         }
-
-        h1 {
-            font-size: 28px;
-            color: #ffdb58;
+        .status {
+            font-size: 1.5em;
             margin-bottom: 20px;
         }
-
-        #status {
-            font-size: 18px;
-            margin-bottom: 15px;
-        }
-
-        button {
-            padding: 10px 20px;
-            font-size: 16px;
-            color: #ffffff;
-            background-color: #ff5e57;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-
-        button:hover {
-            background-color: #e04a44;
-        }
-
-        .location-data {
+        .button-container {
             margin-top: 20px;
-            padding: 10px;
-            background-color: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
         }
-
+        button {
+            font-family: 'Roboto Mono', monospace;
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+        }
+        .image-container {
+            width: 30%;
+            position: relative;
+        }
+        .background-image {
+            width: 100%;
+            height: 100vh;
+            object-fit: cover;
+        }
         .signature {
             position: absolute;
-            bottom: 10px;
-            right: 10px;
-            font-size: 14px;
-            color: #ffffff;
-            font-weight: 700;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            color: white;
+            font-size: 1em;
+        }
+        .logo {
+            width: 200px; /* Set width for logo */
+            margin-bottom: 40px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Live Location Tracker</h1>
-        <p id="status">Waiting for location...</p>
-        <button onclick="startTracking()">Start Tracking</button>
-        <div class="location-data" id="locationData" style="display: none;">
-            <p>Latitude: <span id="latitude"></span></p>
-            <p>Longitude: <span id="longitude"></span></p>
+        <!-- Insert your logo here -->
+        <img src="Logo.png" alt="Aurum Logo" class="logo"> <!-- Update this path -->
+        <div id="logo" style="font-size: 3em;"></div>
+        <div id="status-text" class="status">Fetching Location...</div>
+        <div id="connection-status" class="status">Not Connected</div>
+        <div class="coordinates">
+            <div>Longitude: <span id="longitude">-</span></div>
+            <div>Latitude: <span id="latitude">-</span></div>
+        </div>
+        <div class="button-container">
+            <button onclick="startFetchingLocation()">Start</button>
         </div>
     </div>
-
-    <div class="signature">Mantra/Vedanti</div> <!-- Signature text -->
-
-    <script>
-        let locationUpdateInterval;
-
-        function sendLocationToESP32(latitude, longitude) {
-            const esp32IP = 'http://192.168.137.11'; // Replace with the ESP32's IP address
-
-            fetch(`${esp32IP}/location?latitude=${latitude}&longitude=${longitude}`, {
-                method: 'POST',
-            })
-            .then(response => response.text())
-            .then(data => {
-                console.log('Location sent successfully:', data);
-                document.getElementById('status').innerText = 'Location sent to ESP32!';
-            })
-            .catch((error) => {
-                console.error('Failed to send location:', error);
-                document.getElementById('status').innerText = 'Failed to send location.';
-            });
-        }
-
-        function startTracking() {
-            if (navigator.geolocation) {
-                navigator.geolocation.watchPosition(
-                    function(position) {
-                        const latitude = position.coords.latitude;
-                        const longitude = position.coords.longitude;
-                        document.getElementById('status').innerText = 'Tracking location...';
-                        document.getElementById('locationData').style.display = 'block';
-                        document.getElementById('latitude').innerText = latitude.toFixed(6);
-                        document.getElementById('longitude').innerText = longitude.toFixed(6);
-
-                        // Clear any existing intervals to avoid multiple intervals running simultaneously
-                        if (locationUpdateInterval) {
-                            clearInterval(locationUpdateInterval);
-                        }
-
-                        // Send location data every second
-                        locationUpdateInterval = setInterval(() => {
-                            sendLocationToESP32(latitude, longitude);
-                        }, 1000);
-
-                    },
-                    function(error) {
-                        switch(error.code) {
-                            case error.PERMISSION_DENIED:
-                                alert("User denied the request for Geolocation.");
-                                break;
-                            case error.POSITION_UNAVAILABLE:
-                                alert("Location information is unavailable.");
-                                break;
-                            case error.TIMEOUT:
-                                alert("The request to get user location timed out.");
-                                break;
-                            case error.UNKNOWN_ERROR:
-                                alert("An unknown error occurred.");
-                                break;
-                        }
-                        console.error('Error:', error);
-                        document.getElementById('status').innerText = 'Failed to get location.';
-                    },
-                    { enableHighAccuracy: true, timeout: 5000, maximumAge: 0 }
-                );
-            } else {
-                document.getElementById('status').innerText = 'Geolocation is not supported by this browser.';
-                alert("Geolocation is not supported by this browser.");
-            }
-        }
-    </script>
+    <div class="image-container">
+        <img src="kendall.png" alt="Kendall Jenner" class="background-image"> <!-- Local image path -->
+        <div class="signature">Mantra / Vedanti</div>
+    </div>
+    <script src="script.js"></script>
 </body>
 </html>
