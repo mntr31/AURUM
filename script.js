@@ -40,7 +40,7 @@ function startFetchingLocation() {
 }
 
 function checkConnectionAndSendLocation(lat, lon) {
-    fetch('http://192.168.1.100/check-connection')  // Adjust with your ESP32 IP and endpoint
+    fetch('http://192.168.1.184/check-connection')  // Adjust with your ESP32 IP and endpoint
     .then(response => response.json())
     .then(data => {
         if (data.connected) {
@@ -57,7 +57,7 @@ function checkConnectionAndSendLocation(lat, lon) {
 }
 
 function sendLocationToESP32(lat, lon) {
-    fetch('http://192.168.1.100/location', {  // Replace with your ESP32 IP address
+    fetch('http://192.168.1.184/location', {  // Replace with your ESP32 IP address
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded'
